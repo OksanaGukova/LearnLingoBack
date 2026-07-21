@@ -1,15 +1,16 @@
 import { createTeacher, deleteTeacher, getAllTeachers, getTeacherById, updateTeacher } from "../services/teachers";
+import { parsePaginationParams } from "../utils/parsePaginationParams";
 
 export const getAllTeachersController = async (req, res, next) => {
-    try {
-        const teachers = await getAllTeachers();
-        res.status(200).json({
-            data: teachers,
-        });
-    } catch (error) {
-        next(error);
+    const { page, perPage } = parsePaginationParams(req.query);
+    const teachers = await getAllTeachers(page, perPage);
+ res.json({
+    status: 200,
+    message: 'Successfully found teachers!',
+    data: teachers,
+  });
     };
-};
+
 
 export const getTeacherByIdController = async (req, res, next) => {
     try {
