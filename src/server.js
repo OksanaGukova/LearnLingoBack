@@ -3,6 +3,7 @@ import pino from 'pino-http';
 import cors from 'cors';
 import dotenv from "dotenv";
 import { getEnvVar } from './utils/getEnvVar.js';
+import router from './routers/index.js';
 
 
   dotenv.config();
@@ -15,6 +16,7 @@ export const startServer = () => {
 
   app.use(express.json());
   app.use(cors());
+  app.use(router);
 
 
   app.use(

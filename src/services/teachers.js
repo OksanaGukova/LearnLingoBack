@@ -1,8 +1,17 @@
 import { TeacherCollection } from "../bd/models/teacher.js";
+import { calculatePaginationData } from "../utils/calculatePaginationData.js";
 
-export const getAllTeachers = async () => {
-    const teachers = await TeacherCollection.find();
-    return teachers;
+export const getAllTeachers = async ({page, perPage}) => {
+  const limit = perPage;
+  const skip = (page - 1) * perPage;
+    const teachersQuery = TeacherCollection.find();
+    const teachersCount = await TeacherCollection.find().merge(teachersQuery).countDocuments();
+    const teachers = await teachersQuery.skip(skip).limit(limit).exec();
+    const paginationData = calculatePaginationData(teachersCount, perPage, page);
+    return  {
+      data: teachers,
+      ...paginationData,
+    };
   };
 
   export const getTeacherById = async (teacherId) => {

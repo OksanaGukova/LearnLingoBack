@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-export const createTeacherShema = Joi.object({
+export const createTeacherSchema = Joi.object({
   name: Joi.string().required(),
   surname: Joi.string().required(),
   language: Joi.array().items(Joi.string()).required(),
@@ -22,7 +22,7 @@ export const createTeacherShema = Joi.object({
 });
 
 
-export const updateTeacherShema = Joi.object({
+export const updateTeacherSchema = Joi.object({
   name: Joi.string(),
   surname: Joi.string(),
   language: Joi.array().items(Joi.string()),

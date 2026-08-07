@@ -1,9 +1,9 @@
-import { createTeacher, deleteTeacher, getAllTeachers, getTeacherById, updateTeacher } from "../services/teachers";
-import { parsePaginationParams } from "../utils/parsePaginationParams";
+import { createTeacher, deleteTeacher, getAllTeachers, getTeacherById, updateTeacher } from "../services/teachers.js";
+import { parsePaginationParams } from "../utils/parsePaginationParams.js";
 
 export const getAllTeachersController = async (req, res, next) => {
     const { page, perPage } = parsePaginationParams(req.query);
-    const teachers = await getAllTeachers(page, perPage);
+    const teachers = await getAllTeachers({page, perPage});
  res.json({
     status: 200,
     message: 'Successfully found teachers!',
