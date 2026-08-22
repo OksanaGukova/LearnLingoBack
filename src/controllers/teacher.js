@@ -1,11 +1,13 @@
 import { createTeacher, deleteTeacher, getAllTeachers, getTeacherById, updateTeacher } from "../services/teachers.js";
+import { parseFilterParams } from "../utils/parseFilterParams.js";
 import { parsePaginationParams } from "../utils/parsePaginationParams.js";
 import { parseSortParams } from "../utils/parseSortParams.js";
 
 export const getAllTeachersController = async (req, res, next) => {
     const { page, perPage } = parsePaginationParams(req.query);
     const { sortBy, sortOrder } = parseSortParams(req.query);
-    const teachers = await getAllTeachers({ page, perPage, sortBy, sortOrder });
+    const filter = parseFilterParams(req.query);
+    const teachers = await getAllTeachers({ page, perPage, sortBy, sortOrder, filter });
     res.json({
         status: 200,
         message: 'Successfully found teachers!',
