@@ -1,3 +1,4 @@
+import createHttpError from "http-errors";
 import { ONE_DAY } from "../constans/index.js";
 import { loginUser, logoutUser, refreshUserSession, registerUser } from "../services/auth.js";
 
@@ -11,30 +12,40 @@ export const registerUserController = async (req, res, next) => {
 
 export const loginUserController = async (req, res, next) => {
     const user = await loginUser(req.body);
+
     res.cookie("refreshToken", user.refreshToken, {
         httpOnly: true,
-        secure: new Date(Date.now() + ONE_DAY),
-    });
-    res.cookie('sessionId', user.session._id, {
-        httpOnly: true,
-        secure: new Date(Date.now() + ONE_DAY),
-    });
-    res.status(200).json({
-        message: "User logged in successfully",
-        data: { accessToken: user.accessToken, },
+        secure: true,
+        maxAge: ONE_DAY,
     });
 
+    res.cookie("sessionId", user._id, {
+        httpOnly: true,
+        secure: true,
+        maxAge: ONE_DAY,
+    });
+
+    res.status(200).json({
+        message: "User logged in successfully",
+        data: {
+            accessToken: user.accessToken,
+        },
+    });
 };
 
 export const logoutUserController = async (req, res, next) => {
-    if (req.cookies.sessionId) {
-        await logoutUser(req.cookies.sessionId);
-        res.clearCookie("refreshToken");
-        res.clearCookie("sessionId");
-        res.status(204).json({
-            message: "User logged out successfully",
-        });
+    const { sessionId } = req.cookies;
+
+    if (!sessionId) {
+        return next(createHttpError(401, "User is not logged in"));
     }
+
+    await logoutUser(sessionId);
+
+    res.clearCookie("refreshToken");
+    res.clearCookie("sessionId");
+
+    res.status(204).send();
 };
 
 

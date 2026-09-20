@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { randomBytes } from 'crypto';
 import { FIFTEEN_MINUTES, ONE_DAY } from "../constans/index.js";
 import { SessionsCollection } from "../bd/models/session.js";
+import createHttpError from "http-errors";
 
 export const registerUser = async (payload) => {
     const user = await userCollection.findOne({ email: payload.email });
@@ -19,12 +20,12 @@ export const loginUser = async (payload) => {
     const isPasswordValid = await bcrypt.compare(payload.password, user.password);
     if (!isPasswordValid) throw new Error(401, "Invalid password");
 
-    await userCollection.deleteOne({ userId: user._id });
+    await SessionsCollection.deleteOne({ userId: user._id });
 
     const accessToken = randomBytes(32).toString("hex");
     const refreshToken = randomBytes(32).toString("hex");
 
-    return await userCollection.create(
+    return await SessionsCollection.create(
         {
             userId: user._id,
             accessToken,
@@ -36,10 +37,11 @@ export const loginUser = async (payload) => {
 };
 
 export const logoutUser = async (sessionId) => {
-    const user = await userCollection.findOne({ _id: sessionId });
-    if (!user) throw new Error(404, "User not found");
+    const session = await SessionsCollection.findByIdAndDelete(sessionId);
 
-    await SessionsCollection.deleteOne({ _id: sessionId });
+    if (!session) {
+        throw createHttpError(401, "User is not logged in");
+    }
 };
 
 
