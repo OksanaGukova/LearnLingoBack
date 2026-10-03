@@ -1,0 +1,45 @@
+import createHttpError from "http-errors";
+import { SessionsCollection } from "../bd/models/session.js";
+import { userCollection } from "../bd/models/user.js";
+
+
+export const authenticate = async (req, res, next) => {
+    const authHeader = req.get("Authorization");
+
+    if (!authHeader) {
+        next(createHttpError(401, 'Please provide Authorization header'));
+        return;
+    }
+
+    const barear = authHeader.split(" ")[0];
+    const token = authHeader.split(" ")[1];
+
+    if (barear !== "Bearer" || !token) {
+        next(createHttpError(401, 'Invalid Authorization header'));
+        return;
+    }
+
+    const session = await SessionsCollection.findOne({ accessToken: token });
+
+    if (!session) {
+        next(createHttpError(401, 'Invalid access token'));
+        return;
+    }
+
+    const isAccessTokenExpired = new Date(session.accessTokenValidUntil) < new Date();
+    if (isAccessTokenExpired) {
+        next(createHttpError(401, 'Access token expired'));
+        return;
+    }
+
+    const user = await userCollection.findById(session.userId);
+
+    if (!user) {
+        next(createHttpError(401, 'User not found'));
+        return;
+    }
+
+    req.user = user;
+    req.session = session;
+    next();
+};

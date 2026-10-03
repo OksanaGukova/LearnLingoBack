@@ -4,8 +4,11 @@ import { createTeacherController, deleteTeacherController, getAllTeachersControl
 import { validateBody } from "../middlewares/validateBody.js";
 import { createTeacherSchema } from "../validations/teacher.js";
 import { isValidId } from "../middlewares/isValidId.js";
+import { authenticate } from "../middlewares/authenticate.js";
 
 const router = Router();
+
+router.use(authenticate);
 
 router.get("/", ctrlWrapper(getAllTeachersController));
 router.get("/:teacherId", isValidId, ctrlWrapper(getTeacherByIdController));
