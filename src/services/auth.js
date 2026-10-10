@@ -7,12 +7,20 @@ import createHttpError from "http-errors";
 
 export const registerUser = async (payload) => {
     const user = await userCollection.findOne({ email: payload.email });
-    if (user) throw new Error(409, "User with this email already exists");
+
+    if (user) {
+        const error = new Error("User with this email already exists");
+        error.status = 409;
+        throw error;
+    }
 
     const encryptedPassword = await bcrypt.hash(payload.password, 10);
-    return await userCollection.create({ ...payload, password: encryptedPassword });
-};
 
+    return await userCollection.create({
+        ...payload,
+        password: encryptedPassword,
+    });
+};
 export const loginUser = async (payload) => {
     const user = await userCollection.findOne({ email: payload.email });
     if (!user) throw new Error(404, "User not found");
