@@ -35,9 +35,12 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "handlebars": "^4.7.10",
     "http-errors": "^2.0.1",
     "joi": "^18.2.3",
+    "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.3",
+    "nodemailer": "^10.2.1",
     "pino-http": "^11.0.0"
   }
 }

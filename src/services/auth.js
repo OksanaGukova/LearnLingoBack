@@ -4,6 +4,9 @@ import { randomBytes } from 'crypto';
 import { FIFTEEN_MINUTES, ONE_DAY } from "../constans/index.js";
 import { SessionsCollection } from "../bd/models/session.js";
 import createHttpError from "http-errors";
+import { getEnvVar } from "../utils/getEnvVar.js";
+import jwt from 'jsonwebtoken';
+import { sendMail } from "../utils/sendMail.js";
 
 export const registerUser = async (payload) => {
     const user = await userCollection.findOne({ email: payload.email });
@@ -74,4 +77,26 @@ export const refreshUserSession = async ({ sessionId, refreshToken }) => {
     const newSession = createSession();
     await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
     return await SessionsCollection.create({ userId: session.userId, ...newSession });
+};
+
+
+export const requestResetToken = async (email) => {
+    const user = await userCollection.findOne({ email });
+    if (!user) throw new Error(404, "User not found");
+    const resetToken = jwt.sign(
+        {
+            sub: user._id,
+            email,
+        },
+        getEnvVar('JWT_SECRET'),
+        {
+            expiresIn: '1h',
+        },
+    );
+    await sendMail({
+        from: getEnvVar('SMTP_FROM'),
+        to: email,
+        subject: 'Password Reset Request',
+        text: `You requested a password reset. Use the following token to reset your password: ${resetToken}`,
+    });
 };
